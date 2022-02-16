@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.gnkoshelev.kontur.intern.chartographer.universal.FileManager;
+import ru.gnkoshelev.kontur.intern.chartographer.component.ChartaService;
 
 import java.io.InputStream;
 
@@ -20,13 +20,13 @@ import java.io.InputStream;
 public class ApiController {
 
     @Autowired
-    FileManager fileManager;
+    private ChartaService service;
 
     @PostMapping("/")
     public ResponseEntity createCanvas(@RequestParam int width,
                                        @RequestParam int height) {
-        System.out.println(fileManager.getImageDirectory());
-        return new ResponseEntity<>(String.format("width: %d, height: %d", width, height), HttpStatus.CREATED);
+        var result = service.createCanvas(width, height);
+        return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
 
     // MULTIPART_FORM_DATA_VALUE
