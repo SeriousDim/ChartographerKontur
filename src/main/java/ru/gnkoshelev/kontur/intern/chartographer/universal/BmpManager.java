@@ -58,7 +58,7 @@ public class BmpManager {
     }
 
     public void createNewFile(String fileName, int width, int height) {
-        var plus = IJ.createImage(fileName, "RGB", width, height, 24);
+        var plus = IJ.createImage(fileName, "RGB", width, height, 1);
         IJ.save(plus, path + "/" + fileName + ".bmp");
 
     }

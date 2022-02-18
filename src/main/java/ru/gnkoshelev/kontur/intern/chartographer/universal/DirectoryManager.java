@@ -15,6 +15,17 @@ public class DirectoryManager {
                         path.contains("\\"));
     }
 
+    public static String removeLeadSlash(String path) {
+        if (path.startsWith("\\\\")) {
+            return path.substring(2);
+        } else if (path.startsWith("/") ||
+                path.startsWith("\\")) {
+            return path.substring(1);
+        }
+
+        return path;
+    }
+
     public static void tryCreateDirectory(String path)
             throws DirectoryCreationFailureException, DirectoryExistsException {
         var dir = new File(path);
