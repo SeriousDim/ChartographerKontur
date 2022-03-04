@@ -1,9 +1,10 @@
-package ru.gnkoshelev.kontur.intern.chartographer.component;
+package ru.gnkoshelev.kontur.intern.chartographer.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.gnkoshelev.kontur.intern.chartographer.exception.FileNotFoundException;
-import ru.gnkoshelev.kontur.intern.chartographer.universal.BmpManager;
+import ru.gnkoshelev.kontur.intern.chartographer.component.BmpManager;
+import ru.gnkoshelev.kontur.intern.chartographer.exception.ParamOutOfBounds;
 
 import java.io.IOException;
 
@@ -26,19 +27,24 @@ public class ChartaService {
         return id;
     }
 
-    public byte[] getWholeFile(String imgName)
-            throws FileNotFoundException, IOException {
-        var bytes = manager.getFile(imgName);
-
-        if (bytes == null) {
-            throw new FileNotFoundException(manager.getFilePath(imgName));
-        }
+    public byte[] getChartaFragment(String fileId,
+                                  int x, int y,
+                                  int width, int height)
+            throws FileNotFoundException, ParamOutOfBounds, IOException {
+        var bytes = manager.getFragement(fileId, x, y, width, height);
 
         return bytes;
     }
 
-    public byte[] getFragment() {
-        return null;
+    public byte[] getWholeCharta(String fileId)
+            throws FileNotFoundException {
+        var bytes = manager.readFileAsBytes(fileId);
+
+        if (bytes == null) {
+            throw new FileNotFoundException(manager.getFilePath(fileId));
+        }
+
+        return bytes;
     }
 
 }

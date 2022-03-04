@@ -2,13 +2,12 @@ package ru.gnkoshelev.kontur.intern.chartographer;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
-import ru.gnkoshelev.kontur.intern.chartographer.config.Log;
+import ru.gnkoshelev.kontur.intern.chartographer.helpers.Log;
 import ru.gnkoshelev.kontur.intern.chartographer.config.MainConfig;
-import ru.gnkoshelev.kontur.intern.chartographer.universal.BmpManager;
+import ru.gnkoshelev.kontur.intern.chartographer.component.BmpManager;
 import ru.gnkoshelev.kontur.intern.chartographer.universal.DirectoryManager;
 
 @SpringBootApplication

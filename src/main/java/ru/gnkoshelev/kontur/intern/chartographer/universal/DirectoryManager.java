@@ -8,6 +8,9 @@ import java.util.regex.Pattern;
 
 public class DirectoryManager {
 
+    /**
+     * Используйте {@link DirectoryManager#tryCreateDirectory(String)}
+     */
     @Deprecated
     public static boolean isValidPath(String path) {
         return !path.isBlank() &&
@@ -39,5 +42,7 @@ public class DirectoryManager {
             throw new DirectoryCreationFailureException(path);
         }
     }
+
+
 
 }

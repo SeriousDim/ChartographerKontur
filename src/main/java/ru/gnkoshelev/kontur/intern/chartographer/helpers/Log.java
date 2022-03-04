@@ -1,4 +1,4 @@
-package ru.gnkoshelev.kontur.intern.chartographer.config;
+package ru.gnkoshelev.kontur.intern.chartographer.helpers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
