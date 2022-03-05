@@ -1,6 +1,7 @@
 package ru.gnkoshelev.kontur.intern.chartographer.component;
 
 import ij.IJ;
+import ij.process.ImageProcessor;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
@@ -17,6 +18,7 @@ import ru.gnkoshelev.kontur.intern.chartographer.universal.interfaces.FileManage
 
 import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -131,6 +133,8 @@ public class BmpManager implements FileManagerInterface {
 
     public void createNewFile(String fileName, int width, int height) {
         var plus = IJ.createImage(fileName, "RGB", width, height, 1);
+        var processor = plus.getProcessor();
+        drawBlackRect(processor, 0, 0, width, height);
         IJ.save(plus, getFilePath(fileName));
     }
 
@@ -172,6 +176,13 @@ public class BmpManager implements FileManagerInterface {
 
     public void deleteFile(String fileName) {
 
+    }
+
+    private void drawBlackRect(ImageProcessor p, int x, int y,
+                               int width, int height) {
+        p.setColor(Color.BLACK);
+        p.fill();
+        p.drawRect(x, y, width, height);
     }
 
     private byte[] crop(BufferedImage img, int x, int y,
