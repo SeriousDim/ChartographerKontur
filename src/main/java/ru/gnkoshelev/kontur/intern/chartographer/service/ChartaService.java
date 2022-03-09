@@ -40,10 +40,6 @@ public class ChartaService {
             throws FileNotFoundException {
         var bytes = manager.readFileAsBytes(fileId);
 
-        if (bytes == null) {
-            throw new FileNotFoundException(manager.getFilePath(fileId));
-        }
-
         return bytes;
     }
 
