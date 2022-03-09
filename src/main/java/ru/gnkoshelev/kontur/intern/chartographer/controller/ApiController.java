@@ -74,6 +74,7 @@ public class ApiController {
         } catch (Exception e) {
             var message = e.getClass().getSimpleName() + " : " + e.getMessage();
             logger.error(message);
+            e.printStackTrace();
             return Responder.respondText(message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

@@ -24,6 +24,7 @@ import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.ImageObserver;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -132,13 +133,6 @@ public class BmpManager implements FileManagerInterface {
 
     // Методы основного функционала
 
-    public ImagePlus createImage(String fileName, int width, int height) {
-        var plus = createImage(fileName, width, height);
-        var processor = plus.getProcessor();
-        drawBlackRect(processor, 0, 0, width, height);
-        return plus;
-    }
-
     public void createNewFile(String fileName, int width, int height) {
         var plus = createImage(fileName, width, height);
         IJ.save(plus, getFilePath(fileName));
@@ -176,14 +170,30 @@ public class BmpManager implements FileManagerInterface {
                             "Размеры изображения: " + img.getWidth() + "x" + img.getHeight());
         }
 
-        var usefulFrag = crop(img, x, y, width, height);
+        var usefulFrag = crop(file, x, y, width, height);
         var result = createImage("buffer", width, height);
 
-        var fragCenter = new int[] {x + width/2, y + height/2};
-        var imgCenter = new int[] {img.getWidth()/2, img.getHeight()/2};
-        var translateVec = new int[] {imgCenter[0] - fragCenter[0], imgCenter[1] - fragCenter[1]};
+        var fragCenter = new Point(x + width/2, y + height/2);
+        var imgCenter = new Point(img.getWidth()/2, img.getHeight()/2);
+        var translateVec = new Point(imgCenter.x - fragCenter.x, imgCenter.y - fragCenter.y);
 
+        var translateXPos = translateVec.x >= 0;
+        var translateYPos = translateVec.y >= 0;
 
+        var point = new Point(0, 0);
+        if (translateXPos && translateYPos) {
+            point.setLocation(width - usefulFrag.getWidth(), height - usefulFrag.getHeight());
+        } else if (translateXPos && !translateYPos) {
+            point.setLocation(width - usefulFrag.getWidth(), 0);
+        } else if (!translateXPos && translateYPos) {
+            point.setLocation(0, height - usefulFrag.getHeight());
+        }
+
+        var graphics = result.getBufferedImage().getGraphics();
+        while(!graphics.drawImage(usefulFrag, point.x, point.y, null));
+        graphics.dispose();
+
+        return bufferedImgToBytes(result.getBufferedImage());
     }
 
     public void deleteFile(String fileName) {
@@ -192,6 +202,24 @@ public class BmpManager implements FileManagerInterface {
 
 
     // Дополнительные методы класса
+
+    public byte[] bufferedImgToBytes(BufferedImage img) throws IOException {
+        var baos = new ByteArrayOutputStream();
+        try (baos) {
+            ImageIO.write(img, FILE_FORMAT.substring(1), baos);
+        } catch (Exception e) {
+            throw e;
+        }
+
+        return baos.toByteArray();
+    }
+
+    public ImagePlus createImage(String fileName, int width, int height) {
+        var plus = IJ.createImage(fileName, "RGB", width, height, 1);
+        var processor = plus.getProcessor();
+        drawBlackRect(processor, 0, 0, width, height);
+        return plus;
+    }
 
     public void tryCreateDirectory() throws DirectoryCreationFailureException {
         logger = Log.get(BmpManager.class);
@@ -224,8 +252,9 @@ public class BmpManager implements FileManagerInterface {
      * Соответственно, размеры фрагмента в таком случае получатся
      * меньше ожидаемых, либо фрагмент получится соверешенно не тем.
      */
-    public byte[] crop(BufferedImage img, int x, int y,
+    public BufferedImage crop(File f, int x, int y,
                         int width, int height) throws IOException {
+        var img = ImageIO.read(f);
         var imgWidth = img.getWidth();
         var imgHeight = img.getHeight();
         var nx = Math.min(Math.max(x, 0), imgWidth-1);
@@ -233,9 +262,9 @@ public class BmpManager implements FileManagerInterface {
         var nx2 = Math.min(Math.max(x+width, 0), imgWidth-1);
         var ny2 = Math.min(Math.max(y+height, 0), imgHeight-1);
 
-        /*Rectangle sourceRegion = new Rectangle(nx, ny, nx2 - nx + 1, ny2 - ny + 1);
+        Rectangle sourceRegion = new Rectangle(nx, ny, nx2 - nx + 1, ny2 - ny + 1);
 
-        ImageInputStream stream = ImageIO.createImageInputStream(img);
+        ImageInputStream stream = ImageIO.createImageInputStream(f);
         Iterator<ImageReader> readers = ImageIO.getImageReaders(stream);
 
         if (readers.hasNext()) {
@@ -243,22 +272,16 @@ public class BmpManager implements FileManagerInterface {
             reader.setInput(stream);
 
             ImageReadParam param = reader.getDefaultReadParam();
-            param.setSourceRegion(sourceRegion); // Set region
+            param.setSourceRegion(sourceRegion);
 
-            BufferedImage image = reader.read(0, param);
-        }*/
-
-        var sub = img.getSubimage(nx, ny, nx2 - nx + 1, ny2 - ny + 1);
-        var baos = new ByteArrayOutputStream();
-        try {
-            ImageIO.write(sub, FILE_FORMAT.substring(1), baos);
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            baos.close();
+            var image = reader.read(0, param);
+            return image;
+        } else {
+            var mes = String.format("Не удалось обрезать изображение. Размеры изображения: %dx%d. Попытка обрезать " +
+                    "по следующим точкам: (%d, %d), (%d, %d). Ширина: %d. Высота: %d", imgWidth, imgHeight,
+                    nx, ny, nx2, ny2, nx2 - nx + 1, ny2 - ny + 1);
+            throw new IOException(mes);
         }
-
-        return baos.toByteArray();
     }
 
 }
