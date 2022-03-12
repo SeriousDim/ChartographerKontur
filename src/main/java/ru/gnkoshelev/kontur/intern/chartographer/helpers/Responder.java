@@ -1,5 +1,6 @@
 package ru.gnkoshelev.kontur.intern.chartographer.helpers;
 
+import org.slf4j.Logger;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,6 +17,13 @@ public class Responder extends HttpHeaders {
         var result = new HttpHeaders();
         result.setContentType(type);
         return result;
+    }
+
+    public static <T> ResponseEntity<T> processException(Exception e, Logger logger) {
+        var message = e.getClass().getSimpleName() + " : " + e.getMessage();
+        logger.error(message);
+        e.printStackTrace();
+        return (ResponseEntity<T>) Responder.respondText(message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     public static <T> ResponseEntity<T> respond(T body, MediaType type, HttpStatus status) {

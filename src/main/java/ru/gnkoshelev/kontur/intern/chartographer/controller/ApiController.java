@@ -42,8 +42,16 @@ public class ApiController {
     @PostMapping("/")
     public ResponseEntity<String> createCanvas(@RequestParam int width,
                                        @RequestParam int height) {
-        var result = service.createCanvas(width, height);
-        return Responder.respondText(result, HttpStatus.OK);
+        logger = Log.get("ApiController");
+
+        try {
+            var result = service.createCanvas(width, height);
+            return Responder.respondText(result, HttpStatus.OK);
+        } catch (ParamOutOfBounds e) {
+            return Responder.respondText(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return Responder.processException(e, logger);
+        }
     }
 
     @PostMapping(value = "/{id}/")
@@ -72,16 +80,24 @@ public class ApiController {
         } catch (ParamOutOfBounds e) {
             return Responder.respondText(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            var message = e.getClass().getSimpleName() + " : " + e.getMessage();
-            logger.error(message);
-            e.printStackTrace();
-            return Responder.respondText(message, HttpStatus.INTERNAL_SERVER_ERROR);
+            return Responder.processException(e, logger);
         }
     }
 
-    @DeleteMapping("")
-    public ResponseEntity<?> deleteCanvas() {
-        return ResponseEntity.ok("TestMapping");
+    @DeleteMapping(value = "/{id}/")
+    public ResponseEntity<?> deleteCanvas(@PathVariable String id) {
+        try {
+            var result = service.deleteCanvas(id);
+            if (result) {
+                return Responder.respondText("Изображение успешно удалено", HttpStatus.OK);
+            } else {
+                return Responder.respondText("Не удалось удалить изображение", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } catch (FileNotFoundException e) {
+            return Responder.respondText(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return Responder.processException(e, logger);
+        }
     }
 
 }

@@ -127,6 +127,14 @@ public class BmpManager implements FileManagerInterface {
         var checkX = isBetween(x, 0, imgWidth - 1) || isBetween(x2, 0, imgWidth - 1);
         var checkY = isBetween(y, 0, imgHeight - 1) || isBetween(y2, 0, imgHeight - 1);
 
+        /*var answer = checkX && checkY;
+        if (!answer) {
+            checkX = isBetween(0, x, x2) || isBetween(imgWidth - 1, x, x2);
+            checkY = isBetween(0, y, y2) || isBetween(imgHeight - 1, y, y2);
+
+            return checkX && checkY;
+        }*/
+
         return checkX && checkY;
     }
 
@@ -146,15 +154,6 @@ public class BmpManager implements FileManagerInterface {
                                int x, int y,
                                int width, int height)
             throws FileNotFoundException, ParamOutOfBounds, IOException {
-        if (!isFragmentWidthCorrect(width)) {
-            throw new ParamOutOfBounds("width",
-                    "[0, " + MainConfig.MAX_FRAGMENT_WIDTH + "]");
-        }
-        if (!isFragmentHeightCorrect(height)) {
-            throw new ParamOutOfBounds("height",
-                    "[0, " + MainConfig.MAX_FRAGMENT_HEIGHT + "]");
-        }
-
         var path = getFilePath(fileName);
         var file = new File(path);
 
@@ -166,7 +165,7 @@ public class BmpManager implements FileManagerInterface {
 
         if (!isFragmentInBounds(x, y, width, height, img.getWidth(), img.getHeight())) {
             throw new ParamOutOfBounds("x, y",
-                    "Фрагмент должен перескаться с изображением. " +
+                    "Фрагмент должен перескаться с изображением (хотя бы одна из вершин фрагмента должна лежать внутри изображения). " +
                             "Размеры изображения: " + img.getWidth() + "x" + img.getHeight());
         }
 
@@ -189,15 +188,24 @@ public class BmpManager implements FileManagerInterface {
             point.setLocation(0, height - usefulFrag.getHeight());
         }
 
-        var graphics = result.getBufferedImage().getGraphics();
-        while(!graphics.drawImage(usefulFrag, point.x, point.y, null));
+        var resultImg = result.getBufferedImage();
+        var graphics = resultImg.createGraphics();
+        graphics.drawImage(usefulFrag, point.x, point.y, null);
         graphics.dispose();
 
-        return bufferedImgToBytes(result.getBufferedImage());
+        return bufferedImgToBytes(resultImg);
     }
 
-    public void deleteFile(String fileName) {
+    public boolean deleteFile(String fileName)
+        throws FileNotFoundException {
+        var path = getFilePath(fileName);
+        var file = new File(path);
 
+        if (!file.exists()) {
+            throw new FileNotFoundException(fileName);
+        }
+
+        return file.delete();
     }
 
 
