@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,6 +19,7 @@ import ru.gnkoshelev.kontur.intern.chartographer.exception.FileNotFoundException
 import ru.gnkoshelev.kontur.intern.chartographer.service.ChartaService;
 import ru.gnkoshelev.kontur.intern.chartographer.helpers.Log;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -60,8 +62,10 @@ public class ApiController {
                                        @RequestParam int y,
                                        @RequestParam int width,
                                        @RequestParam int height,
-                                       InputStream fileStream) {
-        return ResponseEntity.ok("Ok");
+                                       @RequestBody byte[] fileStream) {
+        logger = Log.get("ApiController");
+        //logger.debug(String.valueOf(fileStream.length));
+        return Responder.respondBmp(fileStream, HttpStatus.OK);
     }
 
     @GetMapping(value = "/{id}/")

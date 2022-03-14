@@ -15,20 +15,17 @@ import ru.gnkoshelev.kontur.intern.chartographer.config.MainConfig;
 import ru.gnkoshelev.kontur.intern.chartographer.exception.DirectoryCreationFailureException;
 import ru.gnkoshelev.kontur.intern.chartographer.exception.DirectoryExistsException;
 import ru.gnkoshelev.kontur.intern.chartographer.universal.DirectoryManager;
-import ru.gnkoshelev.kontur.intern.chartographer.universal.interfaces.FileManagerInterface;
 
 import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 
 
 /**
@@ -38,7 +35,7 @@ import java.util.Iterator;
  */
 @Component(BmpManager.BEAN_NAME)
 @Scope("singleton")
-public class BmpManager implements FileManagerInterface {
+public class BmpManager {
 
     public static final String BEAN_NAME = "bmpWorker";
     public static final String FILE_FORMAT = ".bmp";
@@ -64,7 +61,6 @@ public class BmpManager implements FileManagerInterface {
 
     // Реализация методов интерфейса FileManagerInterface
 
-    @Override
     public String generateId() {
         return "4";
     }
@@ -72,7 +68,6 @@ public class BmpManager implements FileManagerInterface {
     /*
      *
      */
-    @Override
     public byte[] readFileAsBytes(String fileName) throws FileNotFoundException {
         var path = getFilePath(fileName);
         var img = IJ.openAsByteBuffer(path);
@@ -84,26 +79,13 @@ public class BmpManager implements FileManagerInterface {
         return img.array();
     }
 
-    @Override
     public String getFilePath(String fileName) {
-        return path + "/" + fileName + FILE_FORMAT;
+        return getPath() + "/" + fileName + FILE_FORMAT;
     }
 
-    @Override
     public String getPath() {
         return path;
     }
-
-    @Override
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    @Override
-    public void createNewFile(String fileName) {
-        createNewFile(fileName, MainConfig.MAX_WIDTH, MainConfig.MAX_HEIGHT);
-    }
-
 
     // Собственные методы класса
     // Проверка граничных значений
@@ -141,19 +123,7 @@ public class BmpManager implements FileManagerInterface {
 
     // Методы основного функционала
 
-    public void createNewFile(String fileName, int width, int height) {
-        var plus = createImage(fileName, width, height);
-        IJ.save(plus, getFilePath(fileName));
-    }
-
-    public void saveFragment(String fileName, File bmp) {
-
-    }
-
-    public byte[] getFragement(String fileName,
-                               int x, int y,
-                               int width, int height)
-            throws FileNotFoundException, ParamOutOfBounds, IOException {
+    public File openFile(String fileName) throws FileNotFoundException {
         var path = getFilePath(fileName);
         var file = new File(path);
 
@@ -161,13 +131,50 @@ public class BmpManager implements FileManagerInterface {
             throw new FileNotFoundException(fileName);
         }
 
+        return file;
+    }
+
+    public void createNewFile(String fileName, int width, int height) {
+        var plus = createImage(fileName, width, height);
+        IJ.save(plus, getFilePath(fileName));
+    }
+
+    public void saveFragment(String fileName,
+                             byte[] fragmentBytes,
+                             int x, int y,
+                             int width, int height)
+            throws FileNotFoundException, IOException, ParamOutOfBounds {
+        var file = openFile(fileName);
         var img = ImageIO.read(file);
 
-        if (!isFragmentInBounds(x, y, width, height, img.getWidth(), img.getHeight())) {
+        var fragment = ImageIO.read(new ByteArrayInputStream(fragmentBytes));
+
+        if (fragment.getWidth() != width ||
+            fragment.getHeight() != height) {
+            throw new ParamOutOfBounds("", "");
+        }
+
+        var intersec = getFragmentIntersection(x, y, width, height, img.getWidth(), img.getHeight());
+
+        if (!intersec.isEmpty()) {
+
+        } else {
+            throw new ParamOutOfBounds("", "");
+        }
+    }
+
+    public byte[] getFragement(String fileName,
+                               int x, int y,
+                               int width, int height)
+            throws FileNotFoundException, ParamOutOfBounds, IOException {
+        var file = openFile(fileName);
+        var img = ImageIO.read(file);
+
+        /*if (!isFragmentInBounds(x, y, width, height, img.getWidth(), img.getHeight())) {
             throw new ParamOutOfBounds("x, y",
                     "Фрагмент должен перескаться с изображением (хотя бы одна из вершин фрагмента должна лежать внутри изображения). " +
                             "Размеры изображения: " + img.getWidth() + "x" + img.getHeight());
-        }
+        }*/
 
         var usefulFrag = crop(file, x, y, width, height);
         var result = createImage("buffer", width, height);
@@ -198,12 +205,7 @@ public class BmpManager implements FileManagerInterface {
 
     public boolean deleteFile(String fileName)
         throws FileNotFoundException {
-        var path = getFilePath(fileName);
-        var file = new File(path);
-
-        if (!file.exists()) {
-            throw new FileNotFoundException(fileName);
-        }
+        var file = openFile(fileName);
 
         return file.delete();
     }
@@ -248,6 +250,13 @@ public class BmpManager implements FileManagerInterface {
         p.drawRect(x, y, width, height);
     }
 
+    public Rectangle getFragmentIntersection(int x, int y, int width, int height,
+                                             int imgWidth, int imgHeight) {
+        var rFrag = new Rectangle(x, y, width, height);
+        var rImg = new Rectangle(0, 0, imgWidth, imgHeight);
+        return rImg.intersection(rFrag);
+    }
+
     /**
      * Возращает максимально возможный обрезанный фрагмент по границам
      * изображения без проверки параметров.
@@ -265,17 +274,11 @@ public class BmpManager implements FileManagerInterface {
         var img = ImageIO.read(f);
         var imgWidth = img.getWidth();
         var imgHeight = img.getHeight();
-        var nx = Math.min(Math.max(x, 0), imgWidth-1);
-        var ny = Math.min(Math.max(y, 0), imgHeight-1);
-        var nx2 = Math.min(Math.max(x+width, 0), imgWidth-1);
-        var ny2 = Math.min(Math.max(y+height, 0), imgHeight-1);
+        var sourceRegion = getFragmentIntersection(x, y, width, height, imgWidth, imgHeight);
+        var stream = ImageIO.createImageInputStream(f);
+        var readers = ImageIO.getImageReaders(stream);
 
-        Rectangle sourceRegion = new Rectangle(nx, ny, nx2 - nx + 1, ny2 - ny + 1);
-
-        ImageInputStream stream = ImageIO.createImageInputStream(f);
-        Iterator<ImageReader> readers = ImageIO.getImageReaders(stream);
-
-        if (readers.hasNext()) {
+        if (!sourceRegion.isEmpty() && readers.hasNext()) {
             ImageReader reader = readers.next();
             reader.setInput(stream);
 
@@ -287,7 +290,9 @@ public class BmpManager implements FileManagerInterface {
         } else {
             var mes = String.format("Не удалось обрезать изображение. Размеры изображения: %dx%d. Попытка обрезать " +
                     "по следующим точкам: (%d, %d), (%d, %d). Ширина: %d. Высота: %d", imgWidth, imgHeight,
-                    nx, ny, nx2, ny2, nx2 - nx + 1, ny2 - ny + 1);
+                    sourceRegion.x, sourceRegion.y,
+                    sourceRegion.x + sourceRegion.width, sourceRegion.y + sourceRegion.height,
+                    sourceRegion.width, sourceRegion.height);
             throw new IOException(mes);
         }
     }
