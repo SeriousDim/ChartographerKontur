@@ -19,10 +19,15 @@ public class Responder extends HttpHeaders {
         return result;
     }
 
-    public static <T> ResponseEntity<T> processException(Exception e, Logger logger) {
+    public static void showException(Exception e, Logger logger) {
         var message = e.getClass().getSimpleName() + " : " + e.getMessage();
         logger.error(message);
         e.printStackTrace();
+    }
+
+    public static <T> ResponseEntity<T> processException(Exception e, Logger logger) {
+        var message = e.getClass().getSimpleName() + " : " + e.getMessage();
+        showException(e, logger);
         return (ResponseEntity<T>) Responder.respondText(message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

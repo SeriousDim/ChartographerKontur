@@ -149,17 +149,28 @@ public class BmpManager {
 
         var fragment = ImageIO.read(new ByteArrayInputStream(fragmentBytes));
 
-        if (fragment.getWidth() != width ||
-            fragment.getHeight() != height) {
-            throw new ParamOutOfBounds("", "");
+        if (fragment.getWidth() != width) {
+            throw new ParamOutOfBounds("width", "Ширина присылаемого фрагмента и " +
+                    "параметр width должны быть равны");
+        }
+        if (fragment.getHeight() != height) {
+            throw new ParamOutOfBounds("height", "Высота присылаемого фрагмента и " +
+                    "параметр height должны быть равны");
         }
 
         var intersec = getFragmentIntersection(x, y, width, height, img.getWidth(), img.getHeight());
 
         if (!intersec.isEmpty()) {
-
+            var intersecInFrag = transformRect(intersec, new Point(0, 0), new Point(x, y));
+            var croppedFrag = fragment.getSubimage(intersecInFrag.x, intersecInFrag.y,
+                    intersecInFrag.width, intersecInFrag.height);
+            var graphics = img.createGraphics();
+            graphics.drawImage(croppedFrag, intersec.x, intersec.y, null);
+            graphics.dispose();
+            ImageIO.write(img, FILE_FORMAT.substring(1), file);
         } else {
-            throw new ParamOutOfBounds("", "");
+            throw new ParamOutOfBounds("x, y, width, height", "Фрагмент должен " +
+                    "перескаться с изображением");
         }
     }
 
@@ -176,10 +187,10 @@ public class BmpManager {
                             "Размеры изображения: " + img.getWidth() + "x" + img.getHeight());
         }*/
 
-        var usefulFrag = crop(file, x, y, width, height);
+        var usefulFrag = readCropped(file, x, y, width, height);
         var result = createImage("buffer", width, height);
 
-        var fragCenter = new Point(x + width/2, y + height/2);
+        /*var fragCenter = new Point(x + width/2, y + height/2);
         var imgCenter = new Point(img.getWidth()/2, img.getHeight()/2);
         var translateVec = new Point(imgCenter.x - fragCenter.x, imgCenter.y - fragCenter.y);
 
@@ -193,7 +204,10 @@ public class BmpManager {
             point.setLocation(width - usefulFrag.getWidth(), 0);
         } else if (!translateXPos && translateYPos) {
             point.setLocation(0, height - usefulFrag.getHeight());
-        }
+        }*/
+
+        var intersec = getFragmentIntersection(x, y, width, height, img.getWidth(), img.getHeight());
+        var point = transformPoint(new Point(intersec.x, intersec.y), new Point(0, 0), new Point(x, y));
 
         var resultImg = result.getBufferedImage();
         var graphics = resultImg.createGraphics();
@@ -250,12 +264,43 @@ public class BmpManager {
         p.drawRect(x, y, width, height);
     }
 
+    /**
+     *
+     * @param input - точка для преобразования, заданная
+     *              в старой системе координат
+     * @param oldOrigin - точка отсчета старой системы координат,
+     *      *           заданная в старой системе координат
+     * @param newOrigin - точка отсчета новой системы координат,
+     *                  заданная в старой системе координат
+     *
+     * @return точка input. заданная в новой системе координат
+     */
+    public Point transformPoint(Point input, Point oldOrigin, Point newOrigin) {
+        var nx = oldOrigin.x - newOrigin.x + input.x;
+        var ny = oldOrigin.y - newOrigin.y + input.y;
+        return new Point(nx, ny);
+    }
+
+    public Rectangle transformRect(Rectangle input, Point oldOrigin, Point newOrigin) {
+        var result = new Rectangle();
+        var newLeftTop = transformPoint(new Point(input.x, input.y), oldOrigin, newOrigin);
+
+        result.x = newLeftTop.x;
+        result.y = newLeftTop.y;
+        result.width = input.width;
+        result.height = input.height;
+
+        return result;
+    }
+
     public Rectangle getFragmentIntersection(int x, int y, int width, int height,
                                              int imgWidth, int imgHeight) {
         var rFrag = new Rectangle(x, y, width, height);
         var rImg = new Rectangle(0, 0, imgWidth, imgHeight);
         return rImg.intersection(rFrag);
     }
+
+
 
     /**
      * Возращает максимально возможный обрезанный фрагмент по границам
@@ -269,8 +314,8 @@ public class BmpManager {
      * Соответственно, размеры фрагмента в таком случае получатся
      * меньше ожидаемых, либо фрагмент получится соверешенно не тем.
      */
-    public BufferedImage crop(File f, int x, int y,
-                        int width, int height) throws IOException {
+    public BufferedImage readCropped(File f, int x, int y,
+                                     int width, int height) throws IOException {
         var img = ImageIO.read(f);
         var imgWidth = img.getWidth();
         var imgHeight = img.getHeight();
@@ -288,13 +333,17 @@ public class BmpManager {
             var image = reader.read(0, param);
             return image;
         } else {
-            var mes = String.format("Не удалось обрезать изображение. Размеры изображения: %dx%d. Попытка обрезать " +
-                    "по следующим точкам: (%d, %d), (%d, %d). Ширина: %d. Высота: %d", imgWidth, imgHeight,
+            var mes = String.format("Не удалось обрезать изображение. Размеры изображения: %dx%d. Попытка вырезать " +
+                    "следующий прямоугольник: x = %d, y = %d, ширина = %d, высота = %d.\n" +
+                    "Проверьте, что все значения больше нуля", imgWidth, imgHeight,
                     sourceRegion.x, sourceRegion.y,
-                    sourceRegion.x + sourceRegion.width, sourceRegion.y + sourceRegion.height,
                     sourceRegion.width, sourceRegion.height);
             throw new IOException(mes);
         }
+    }
+
+    public BufferedImage readCropped(File f, Rectangle frag) throws IOException {
+        return readCropped(f, frag.x, frag.y, frag.width, frag.height);
     }
 
 }

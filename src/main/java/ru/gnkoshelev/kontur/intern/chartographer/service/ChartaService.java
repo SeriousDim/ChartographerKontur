@@ -37,6 +37,14 @@ public class ChartaService {
         return id;
     }
 
+    public void saveFragment(String fileName,
+                             byte[] fragmentBytes,
+                             int x, int y,
+                             int width, int height)
+            throws FileNotFoundException, ParamOutOfBounds, IOException {
+        manager.saveFragment(fileName, fragmentBytes, x, y, width, height);
+    }
+
     public byte[] getChartaFragment(String fileId,
                                   int x, int y,
                                   int width, int height)

@@ -64,8 +64,19 @@ public class ApiController {
                                        @RequestParam int height,
                                        @RequestBody byte[] fileStream) {
         logger = Log.get("ApiController");
-        //logger.debug(String.valueOf(fileStream.length));
-        return Responder.respondBmp(fileStream, HttpStatus.OK);
+
+        try {
+            service.saveFragment(id, fileStream, x, y, width, height);
+            return Responder.respondBmp(null, HttpStatus.OK);
+        } catch (ParamOutOfBounds | IOException e) {
+            e.printStackTrace();
+            return Responder.respondText(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return Responder.respondText(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return Responder.processException(e, logger);
+        }
     }
 
     @GetMapping(value = "/{id}/")
@@ -93,9 +104,9 @@ public class ApiController {
         try {
             var result = service.deleteCanvas(id);
             if (result) {
-                return Responder.respondText("Изображение успешно удалено", HttpStatus.OK);
+                return Responder.respondText(null, HttpStatus.OK);
             } else {
-                return Responder.respondText("Не удалось удалить изображение", HttpStatus.INTERNAL_SERVER_ERROR);
+                return Responder.respondText(null, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } catch (FileNotFoundException e) {
             return Responder.respondText(e.getMessage(), HttpStatus.NOT_FOUND);
