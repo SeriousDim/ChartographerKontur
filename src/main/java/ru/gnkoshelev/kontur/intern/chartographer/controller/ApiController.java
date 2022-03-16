@@ -48,7 +48,7 @@ public class ApiController {
 
         try {
             var result = service.createCanvas(width, height);
-            return Responder.respondText(result, HttpStatus.OK);
+            return Responder.respondText(result, HttpStatus.CREATED);
         } catch (ParamOutOfBounds e) {
             return Responder.respondText(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {

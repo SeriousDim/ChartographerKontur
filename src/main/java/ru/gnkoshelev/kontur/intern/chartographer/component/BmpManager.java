@@ -15,6 +15,7 @@ import ru.gnkoshelev.kontur.intern.chartographer.config.MainConfig;
 import ru.gnkoshelev.kontur.intern.chartographer.exception.DirectoryCreationFailureException;
 import ru.gnkoshelev.kontur.intern.chartographer.exception.DirectoryExistsException;
 import ru.gnkoshelev.kontur.intern.chartographer.universal.DirectoryManager;
+import ru.gnkoshelev.kontur.intern.chartographer.universal.IdGenerator;
 
 import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
@@ -62,7 +63,15 @@ public class BmpManager {
     // Реализация методов интерфейса FileManagerInterface
 
     public String generateId() {
-        return "4";
+        var id = "";
+        File file = null;
+
+        do {
+            id = IdGenerator.generateIdForHuman(MainConfig.UNIQUE_ID_SYMBOLS_LENGTH);
+            file = new File(getFilePath(id));
+        } while (file.exists());
+
+        return id;
     }
 
     /*

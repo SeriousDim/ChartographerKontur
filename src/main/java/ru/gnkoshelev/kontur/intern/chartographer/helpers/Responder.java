@@ -42,7 +42,8 @@ public class Responder extends HttpHeaders {
     }
 
     public static <T> ResponseEntity<T> respondText(T body, HttpStatus status) {
-        if (body instanceof String && status != HttpStatus.OK) {
+        if (body instanceof String && status != HttpStatus.OK &&
+            status != HttpStatus.CREATED) {
             var newBody = (String)body + MainConfig.HINT;
             return (ResponseEntity<T>) respond(newBody, TEXT_PLAIN, status);
         }

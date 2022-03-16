@@ -7,6 +7,8 @@ public class MainConfig {
 
     public static String bmpPath = "files";
 
+    public static int UNIQUE_ID_SYMBOLS_LENGTH = 6;
+
     public static final int MAX_WIDTH = 20000;
     public static final int MAX_HEIGHT = 50000;
 
