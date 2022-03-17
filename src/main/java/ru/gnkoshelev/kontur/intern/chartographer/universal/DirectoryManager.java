@@ -1,22 +1,10 @@
 package ru.gnkoshelev.kontur.intern.chartographer.universal;
 
-import ru.gnkoshelev.kontur.intern.chartographer.exception.DirectoryCreationFailureException;
-import ru.gnkoshelev.kontur.intern.chartographer.exception.DirectoryExistsException;
+import ru.gnkoshelev.kontur.intern.chartographer.exception.*;
 
 import java.io.File;
-import java.util.regex.Pattern;
 
 public class DirectoryManager {
-
-    /**
-     * Используйте {@link DirectoryManager#tryCreateDirectory(String)}
-     */
-    @Deprecated
-    public static boolean isValidPath(String path) {
-        return !path.isBlank() &&
-                    (path.contains("/") ||
-                        path.contains("\\"));
-    }
 
     public static String removeLeadSlash(String path) {
         if (path.startsWith("\\\\")) {
@@ -43,6 +31,14 @@ public class DirectoryManager {
         }
     }
 
-
+    /**
+     * Используйте {@link DirectoryManager#tryCreateDirectory(String)}
+     */
+    @Deprecated
+    public static boolean isValidPath(String path) {
+        return !path.isBlank() &&
+                (path.contains("/") ||
+                        path.contains("\\"));
+    }
 
 }

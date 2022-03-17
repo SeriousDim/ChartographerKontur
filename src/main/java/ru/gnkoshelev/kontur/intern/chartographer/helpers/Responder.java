@@ -7,7 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import ru.gnkoshelev.kontur.intern.chartographer.config.MainConfig;
 
-public class Responder extends HttpHeaders {
+public class Responder {
 
     public static final MediaType IMAGE_BMP = MediaType.parseMediaType("image/bmp");
     public static final MediaType APP_JSON = MediaType.APPLICATION_JSON;
@@ -43,8 +43,8 @@ public class Responder extends HttpHeaders {
 
     public static <T> ResponseEntity<T> respondText(T body, HttpStatus status) {
         if (body instanceof String && status != HttpStatus.OK &&
-            status != HttpStatus.CREATED) {
-            var newBody = (String)body + MainConfig.HINT;
+                status != HttpStatus.CREATED) {
+            var newBody = body + MainConfig.HINT;
             return (ResponseEntity<T>) respond(newBody, TEXT_PLAIN, status);
         }
 

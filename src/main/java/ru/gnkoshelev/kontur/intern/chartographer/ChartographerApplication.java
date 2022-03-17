@@ -1,25 +1,19 @@
 package ru.gnkoshelev.kontur.intern.chartographer;
 
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
-import ru.gnkoshelev.kontur.intern.chartographer.helpers.Log;
-import ru.gnkoshelev.kontur.intern.chartographer.config.MainConfig;
 import ru.gnkoshelev.kontur.intern.chartographer.component.BmpManager;
+import ru.gnkoshelev.kontur.intern.chartographer.config.MainConfig;
+import ru.gnkoshelev.kontur.intern.chartographer.helpers.Log;
 import ru.gnkoshelev.kontur.intern.chartographer.universal.DirectoryManager;
 
 @SpringBootApplication
 public class ChartographerApplication {
 
-    @Autowired
-    public static BmpManager worker;
-
-    private static Logger logger;
-
     public static void main(String[] args) {
-        logger = Log.get("ChartographerApplication");
+        var logger = Log.get("ChartographerApplication");
 
         logger.debug("Java version: " + System.getProperty("java.version"));
 
@@ -27,15 +21,11 @@ public class ChartographerApplication {
         // (и инициализируем бины)
         logger.debug("MainConfig.bmpPath: " + MainConfig.bmpPath);
         if (args.length > 0) {
-            var pathName = DirectoryManager.removeLeadSlash(args[0]);
-
-            MainConfig.bmpPath = pathName;
+            MainConfig.bmpPath = DirectoryManager.removeLeadSlash(args[0]);
         }
         logger.debug("New value of MainConfig.bmpPath: " + MainConfig.bmpPath);
 
-        //SpringApplication.run(ChartographerApplication.class, args);
         SpringApplicationBuilder builder = new SpringApplicationBuilder(ChartographerApplication.class);
-
         builder.headless(false);
 
         ConfigurableApplicationContext context = builder.run(args);

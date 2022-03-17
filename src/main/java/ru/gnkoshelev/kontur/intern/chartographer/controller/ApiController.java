@@ -13,15 +13,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.gnkoshelev.kontur.intern.chartographer.config.MainConfig;
-import ru.gnkoshelev.kontur.intern.chartographer.exception.ParamOutOfBounds;
-import ru.gnkoshelev.kontur.intern.chartographer.helpers.Responder;
 import ru.gnkoshelev.kontur.intern.chartographer.exception.FileNotFoundException;
-import ru.gnkoshelev.kontur.intern.chartographer.service.ChartaService;
+import ru.gnkoshelev.kontur.intern.chartographer.exception.ParamOutOfBounds;
 import ru.gnkoshelev.kontur.intern.chartographer.helpers.Log;
+import ru.gnkoshelev.kontur.intern.chartographer.helpers.Responder;
+import ru.gnkoshelev.kontur.intern.chartographer.service.ChartaService;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * Spring-контроллер, в котором реализован API приложения
@@ -43,7 +41,7 @@ public class ApiController {
 
     @PostMapping("/")
     public ResponseEntity<String> createCanvas(@RequestParam int width,
-                                       @RequestParam int height) {
+                                               @RequestParam int height) {
         logger = Log.get("ApiController");
 
         try {

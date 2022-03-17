@@ -11,11 +11,11 @@ public class MainConfig {
 
     public static final int MAX_WIDTH = 20000;
     public static final int MAX_HEIGHT = 50000;
-
     public static final int MAX_FRAGMENT_WIDTH = 5000;
     public static final int MAX_FRAGMENT_HEIGHT = 5000;
 
     public static final String HINT = "\n\nДля справки обратитесь по адресу /chartas/ (GET-запрос)";
+
     public static final String INFO = "Добро пожаловать в сервис Chartographer - " +
             "сервис для восстановления изображений древних свитков и папирусов." +
             "" +

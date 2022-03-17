@@ -14,13 +14,13 @@ public class AppContextProvider implements ApplicationContextAware {
         return context;
     }
 
-    public static <T> T getBean(String name, Class<T> cls) {
-        return getApplicationContext().getBean(name, cls);
-    }
-
     @Override
     public void setApplicationContext(ApplicationContext ac)
             throws BeansException {
         context = ac;
+    }
+
+    public static <T> T getBean(String name, Class<T> cls) {
+        return getApplicationContext().getBean(name, cls);
     }
 }

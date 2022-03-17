@@ -2,9 +2,9 @@ package ru.gnkoshelev.kontur.intern.chartographer.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.gnkoshelev.kontur.intern.chartographer.component.BmpManager;
 import ru.gnkoshelev.kontur.intern.chartographer.config.MainConfig;
 import ru.gnkoshelev.kontur.intern.chartographer.exception.FileNotFoundException;
-import ru.gnkoshelev.kontur.intern.chartographer.component.BmpManager;
 import ru.gnkoshelev.kontur.intern.chartographer.exception.ParamOutOfBounds;
 
 import java.io.IOException;
@@ -21,11 +21,11 @@ public class ChartaService {
     private BmpManager manager;
 
     public String createCanvas(int width, int height) throws ParamOutOfBounds {
-        if (!manager.isBetween(width, 1, MainConfig.MAX_WIDTH)){
+        if (!manager.isBetween(width, 1, MainConfig.MAX_WIDTH)) {
             throw new ParamOutOfBounds("width",
                     "[1, " + MainConfig.MAX_WIDTH + "]");
         }
-        if (!manager.isBetween(height, 1, MainConfig.MAX_HEIGHT)){
+        if (!manager.isBetween(height, 1, MainConfig.MAX_HEIGHT)) {
             throw new ParamOutOfBounds("height",
                     "[1, " + MainConfig.MAX_HEIGHT + "]");
         }
@@ -46,8 +46,8 @@ public class ChartaService {
     }
 
     public byte[] getChartaFragment(String fileId,
-                                  int x, int y,
-                                  int width, int height)
+                                    int x, int y,
+                                    int width, int height)
             throws FileNotFoundException, ParamOutOfBounds, IOException {
         if (!manager.isFragmentWidthCorrect(width)) {
             throw new ParamOutOfBounds("width",
@@ -58,9 +58,7 @@ public class ChartaService {
                     "[1, " + MainConfig.MAX_FRAGMENT_HEIGHT + "]");
         }
 
-        var bytes = manager.getFragement(fileId, x, y, width, height);
-
-        return bytes;
+        return manager.getFragement(fileId, x, y, width, height);
     }
 
     public boolean deleteCanvas(String fileId) throws FileNotFoundException {
@@ -69,9 +67,7 @@ public class ChartaService {
 
     public byte[] getWholeCharta(String fileId)
             throws FileNotFoundException {
-        var bytes = manager.readFileAsBytes(fileId);
-
-        return bytes;
+        return manager.readFileAsBytes(fileId);
     }
 
 }

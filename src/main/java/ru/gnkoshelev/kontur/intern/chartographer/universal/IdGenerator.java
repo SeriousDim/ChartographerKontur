@@ -8,11 +8,11 @@ import java.util.UUID;
 public class IdGenerator {
 
     /**
-     * Сгенерировать уникальный человекочитабельный
+     * Генерирует уникальный человекочитабельный
      * идентификатор
      *
-     * @param symbols - кол-во случайных уникальных символов в
-     * идентификаторе
+     * @param symbols кол-во случайных уникальных символов в
+     *                идентификаторе
      * @return уникальный id в формате: "dd-MM-yy-xxxxxx", где
      * dd-MM-yy - сегодняшняя дата, хххххх - кол-во случайных
      * уникальных символов, задаваемых числом symbols
@@ -28,7 +28,6 @@ public class IdGenerator {
 
         var formatter = DateTimeFormatter.ofPattern("dd-MM-yy");
         var dateStr = formatter.format(LocalDate.now());
-
         var beginInd = new Random().nextInt(idLength - symbols - 1);
 
         return dateStr + "-" + id.substring(beginInd, beginInd + symbols);
