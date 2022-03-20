@@ -7,6 +7,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import ru.gnkoshelev.kontur.intern.chartographer.config.MainConfig;
 
+import java.nio.charset.Charset;
+
 public class Responder {
 
     public static final MediaType IMAGE_BMP = MediaType.parseMediaType("image/bmp");
@@ -28,7 +30,7 @@ public class Responder {
     public static <T> ResponseEntity<T> processException(Exception e, Logger logger) {
         var message = e.getClass().getSimpleName() + " : " + e.getMessage();
         showException(e, logger);
-        return (ResponseEntity<T>) Responder.respondText(message, HttpStatus.INTERNAL_SERVER_ERROR);
+        return (ResponseEntity<T>) Responder.respondText(message, HttpStatus.BAD_REQUEST);
     }
 
     public static <T> ResponseEntity<T> respond(T body, MediaType type, HttpStatus status) {

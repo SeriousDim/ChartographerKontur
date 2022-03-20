@@ -1,3 +1,6 @@
+/*
+ * Дмитрий Лыков, 2022
+ */
 package ru.gnkoshelev.kontur.intern.chartographer.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -6,6 +9,7 @@ import ru.gnkoshelev.kontur.intern.chartographer.component.BmpManager;
 import ru.gnkoshelev.kontur.intern.chartographer.config.MainConfig;
 import ru.gnkoshelev.kontur.intern.chartographer.exception.FileNotFoundException;
 import ru.gnkoshelev.kontur.intern.chartographer.exception.ParamOutOfBounds;
+import ru.gnkoshelev.kontur.intern.chartographer.universal.MathManager;
 
 import java.io.IOException;
 
@@ -20,12 +24,12 @@ public class ChartaService {
     @Autowired
     private BmpManager manager;
 
-    public String createCanvas(int width, int height) throws ParamOutOfBounds {
-        if (!manager.isBetween(width, 1, MainConfig.MAX_WIDTH)) {
+    public String createCharta(int width, int height) throws ParamOutOfBounds {
+        if (!MathManager.isBetween(width, 1, MainConfig.MAX_WIDTH)) {
             throw new ParamOutOfBounds("width",
                     "[1, " + MainConfig.MAX_WIDTH + "]");
         }
-        if (!manager.isBetween(height, 1, MainConfig.MAX_HEIGHT)) {
+        if (!MathManager.isBetween(height, 1, MainConfig.MAX_HEIGHT)) {
             throw new ParamOutOfBounds("height",
                     "[1, " + MainConfig.MAX_HEIGHT + "]");
         }
@@ -37,15 +41,15 @@ public class ChartaService {
         return id;
     }
 
-    public void saveFragment(String fileName,
-                             byte[] fragmentBytes,
-                             int x, int y,
-                             int width, int height)
+    public void saveChartaFragment(String fileName,
+                                   byte[] fragmentBytes,
+                                   int x, int y,
+                                   int width, int height)
             throws FileNotFoundException, ParamOutOfBounds, IOException {
         manager.saveFragment(fileName, fragmentBytes, x, y, width, height);
     }
 
-    public byte[] getChartaFragment(String fileId,
+    public byte[] getChartaFragment(String fileName,
                                     int x, int y,
                                     int width, int height)
             throws FileNotFoundException, ParamOutOfBounds, IOException {
@@ -58,11 +62,11 @@ public class ChartaService {
                     "[1, " + MainConfig.MAX_FRAGMENT_HEIGHT + "]");
         }
 
-        return manager.getFragement(fileId, x, y, width, height);
+        return manager.getFragement(fileName, x, y, width, height);
     }
 
-    public boolean deleteCanvas(String fileId) throws FileNotFoundException {
-        return manager.deleteFile(fileId);
+    public boolean deleteCharta(String fileName) throws FileNotFoundException {
+        return manager.deleteFile(fileName);
     }
 
     public byte[] getWholeCharta(String fileId)

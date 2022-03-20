@@ -47,7 +47,21 @@
 			<artifactId>ij</artifactId>
 			<version>1.53j</version>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-test</artifactId>
+		</dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
@@ -55,6 +69,7 @@
                 <groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+					<executable>true</executable>
                     <source>11</source>
                     <target>11</target>
                 </configuration>

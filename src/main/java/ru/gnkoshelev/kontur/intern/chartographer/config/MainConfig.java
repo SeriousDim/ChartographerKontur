@@ -1,6 +1,13 @@
+/*
+ * Дмитрий Лыков, 2022
+ */
 package ru.gnkoshelev.kontur.intern.chartographer.config;
 
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 @Component("mainConfig")
 public class MainConfig {
@@ -14,12 +21,17 @@ public class MainConfig {
     public static final int MAX_FRAGMENT_WIDTH = 5000;
     public static final int MAX_FRAGMENT_HEIGHT = 5000;
 
-    public static final String HINT = "\n\nДля справки обратитесь по адресу /chartas/ (GET-запрос)";
+    public static final String HEAD_ROUTE = "/chartas";
 
-    public static final String INFO = "Добро пожаловать в сервис Chartographer - " +
-            "сервис для восстановления изображений древних свитков и папирусов." +
-            "" +
-            "\n\n" + "Разработчик: Дмитрий Лыков (github.com/SeriousDim). 2022" +
-            "\n" + "Специально для СКБ Контур";
+    public static final String TEXTS_RU = "texts/ru/";
+    public static final String HINT = "\n\nДля справки обратитесь по адресу " +
+            "/chartas/ (GET-запрос)";
+
+    public static final String CANNOT_CROP_IMAGE_MESSAGE =
+            "Не удалось обрезать изображение. Размеры " +
+            "изображения: %dx%d. Попытка вырезать " +
+            "следующий прямоугольник: x = %d, y = %d, ширина = %d, " +
+            "высота = %d.\n" +
+            "Проверьте, что все значения больше нуля";
 
 }

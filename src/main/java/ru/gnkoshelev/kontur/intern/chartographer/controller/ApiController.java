@@ -1,3 +1,6 @@
+/*
+ * Дмитрий Лыков, 2022
+ */
 package ru.gnkoshelev.kontur.intern.chartographer.controller;
 
 import org.slf4j.Logger;
@@ -12,12 +15,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.w3c.dom.Text;
 import ru.gnkoshelev.kontur.intern.chartographer.config.MainConfig;
 import ru.gnkoshelev.kontur.intern.chartographer.exception.FileNotFoundException;
 import ru.gnkoshelev.kontur.intern.chartographer.exception.ParamOutOfBounds;
 import ru.gnkoshelev.kontur.intern.chartographer.helpers.Log;
 import ru.gnkoshelev.kontur.intern.chartographer.helpers.Responder;
 import ru.gnkoshelev.kontur.intern.chartographer.service.ChartaService;
+import ru.gnkoshelev.kontur.intern.chartographer.universal.TextResourceManager;
 
 import java.io.IOException;
 
@@ -25,7 +30,7 @@ import java.io.IOException;
  * Spring-контроллер, в котором реализован API приложения
  */
 @RestController
-@RequestMapping("/chartas")
+@RequestMapping(MainConfig.HEAD_ROUTE)
 public class ApiController {
 
     @Autowired
@@ -35,8 +40,9 @@ public class ApiController {
 
 
     @GetMapping("/")
-    public ResponseEntity<String> info() {
-        return Responder.respondText(MainConfig.INFO, HttpStatus.OK);
+    public ResponseEntity<String> info() throws IOException {
+        var info = TextResourceManager.getText("info.txt");
+        return Responder.respondText(info, HttpStatus.OK);
     }
 
     @PostMapping("/")
@@ -45,7 +51,7 @@ public class ApiController {
         logger = Log.get("ApiController");
 
         try {
-            var result = service.createCanvas(width, height);
+            var result = service.createCharta(width, height);
             return Responder.respondText(result, HttpStatus.CREATED);
         } catch (ParamOutOfBounds e) {
             return Responder.respondText(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -64,7 +70,7 @@ public class ApiController {
         logger = Log.get("ApiController");
 
         try {
-            service.saveFragment(id, fileStream, x, y, width, height);
+            service.saveChartaFragment(id, fileStream, x, y, width, height);
             return Responder.respondBmp(null, HttpStatus.OK);
         } catch (ParamOutOfBounds | IOException e) {
             e.printStackTrace();
@@ -100,11 +106,11 @@ public class ApiController {
     @DeleteMapping(value = "/{id}/")
     public ResponseEntity<?> deleteCanvas(@PathVariable String id) {
         try {
-            var result = service.deleteCanvas(id);
+            var result = service.deleteCharta(id);
             if (result) {
                 return Responder.respondText(null, HttpStatus.OK);
             } else {
-                return Responder.respondText(null, HttpStatus.INTERNAL_SERVER_ERROR);
+                return Responder.respondText(null, HttpStatus.BAD_REQUEST);
             }
         } catch (FileNotFoundException e) {
             return Responder.respondText(e.getMessage(), HttpStatus.NOT_FOUND);

@@ -1,3 +1,6 @@
+/*
+ * Дмитрий Лыков, 2022
+ */
 package ru.gnkoshelev.kontur.intern.chartographer.component;
 
 import ru.gnkoshelev.kontur.intern.chartographer.config.*;
@@ -31,6 +34,7 @@ import java.awt.Rectangle;
 import java.awt.Point;
 import java.awt.Color;
 
+
 /**
  * Бин для работы с изображениями и директориями.
  * Взаимодействует с файловой системой. Создает, сохраняет,
@@ -38,13 +42,17 @@ import java.awt.Color;
  */
 @Component(BmpManager.BEAN_NAME)
 @Scope("singleton")
-public class BmpManager /*extends FileManager*/ {
+public class BmpManager {
 
     public static final String BEAN_NAME = "bmpWorker";
     public static final String FILE_FORMAT = ".bmp";
 
+
     @Value("#{mainConfig.bmpPath}")
-    protected String path;
+    private String path;
+
+    private Logger logger;
+
 
     // Методы для работы с бином
 
@@ -53,13 +61,12 @@ public class BmpManager /*extends FileManager*/ {
     }
 
     @PostConstruct
-    public void postConstruct()
-            throws DirectoryCreationFailureException {
-        //this.fileFormat = FILE_FORMAT;
+    public void postConstruct() throws DirectoryCreationFailureException {
         tryCreateDirectory();
     }
 
-    // ...
+
+    // Реализация методов интерфейса FileManagerInterface
 
     public String generateId() {
         var id = "";
@@ -73,8 +80,7 @@ public class BmpManager /*extends FileManager*/ {
         return id;
     }
 
-    public byte[] readFileAsBytes(String fileName)
-            throws FileNotFoundException {
+    public byte[] readFileAsBytes(String fileName) throws FileNotFoundException {
         var path = getFilePath(fileName);
         var img = IJ.openAsByteBuffer(path);
 
@@ -104,32 +110,15 @@ public class BmpManager /*extends FileManager*/ {
         return MathManager.isBetween(height, 1, MainConfig.MAX_FRAGMENT_HEIGHT);
     }
 
-    /**
-     * Используйте {@link Rectangle#intersection(Rectangle)} или 
-     * {@link Rectangle#intersects(Rectangle)}
-     */
-    @Deprecated
-    public boolean isFragmentInBounds(int x, int y, int width, int height,
-                                      int imgWidth, int imgHeight) {
-        var x2 = x + width;
-        var y2 = y + height;
-        var checkX = MathManager.isBetween(x, 0, imgWidth - 1)
-                     || MathManager.isBetween(x2, 0, imgWidth - 1);
-        var checkY = MathManager.isBetween(y, 0, imgHeight - 1)
-                     || MathManager.isBetween(y2, 0, imgHeight - 1);
-
-        return checkX && checkY;
-    }
 
     // Методы основного функционала
 
-    public File openFile(String fileName)
-            throws FileNotFoundException {
+    public File openFile(String fileName) throws FileNotFoundException {
         var path = getFilePath(fileName);
         var file = new File(path);
 
         if (!file.exists()) {
-            throw new FileNotFoundException(path);
+            throw new FileNotFoundException(fileName);
         }
 
         return file;
@@ -151,26 +140,33 @@ public class BmpManager /*extends FileManager*/ {
         var fragment = ImageIO.read(new ByteArrayInputStream(fragmentBytes));
 
         if (fragment.getWidth() != width) {
-            throw new ParamOutOfBounds("width", "Ширина присылаемого фрагмента и " +
+            throw new ParamOutOfBounds("width",
+                    "Ширина присылаемого фрагмента и " +
                     "параметр width должны быть равны");
         }
         if (fragment.getHeight() != height) {
-            throw new ParamOutOfBounds("height", "Высота присылаемого фрагмента и " +
+            throw new ParamOutOfBounds("height",
+                    "Высота присылаемого фрагмента и " +
                     "параметр height должны быть равны");
         }
 
-        var intersec = MathManager.getFragmentIntersection(x, y, width, height, img.getWidth(), img.getHeight());
+        var intersec = MathManager.getFragmentIntersection(x, y, width, height,
+                img.getWidth(), img.getHeight());
 
         if (!intersec.isEmpty()) {
-            var intersecInFrag = MathManager.transformRect(intersec, new Point(0, 0), new Point(x, y));
-            var croppedFrag = fragment.getSubimage(intersecInFrag.x, intersecInFrag.y,
-                    intersecInFrag.width, intersecInFrag.height);
+            var intersecInFrag = MathManager.transformRect(intersec,
+                    new Point(0, 0), new Point(x, y));
+            var croppedFrag = fragment.getSubimage(intersecInFrag.x,
+                    intersecInFrag.y, intersecInFrag.width,
+                    intersecInFrag.height);
             var graphics = img.createGraphics();
-            graphics.drawImage(croppedFrag, intersec.x, intersec.y, null);
+            graphics.drawImage(croppedFrag,
+                    intersec.x, intersec.y, null);
             graphics.dispose();
             ImageIO.write(img, FILE_FORMAT.substring(1), file);
         } else {
-            throw new ParamOutOfBounds("x, y, width, height", "Фрагмент должен " +
+            throw new ParamOutOfBounds("x, y, width, height",
+                    "Фрагмент должен " +
                     "перескаться с изображением");
         }
     }
@@ -185,8 +181,10 @@ public class BmpManager /*extends FileManager*/ {
         var usefulFrag = readCropped(file, x, y, width, height);
         var result = createImage("buffer", width, height);
 
-        var intersec = MathManager.getFragmentIntersection(x, y, width, height, img.getWidth(), img.getHeight());
-        var point = MathManager.transformPoint(new Point(intersec.x, intersec.y), new Point(0, 0), new Point(x, y));
+        var intersec = MathManager.getFragmentIntersection(x, y, width, height,
+                img.getWidth(), img.getHeight());
+        var point = MathManager.transformPoint(new Point(intersec.x, intersec.y),
+                new Point(0, 0), new Point(x, y));
 
         var resultImg = result.getBufferedImage();
         var graphics = resultImg.createGraphics();
@@ -206,8 +204,7 @@ public class BmpManager /*extends FileManager*/ {
 
     // Дополнительные методы класса
 
-    public byte[] bufferedImgToBytes(BufferedImage img)
-            throws IOException {
+    public byte[] bufferedImgToBytes(BufferedImage img) throws IOException {
         var baos = new ByteArrayOutputStream();
         try (baos) {
             ImageIO.write(img, FILE_FORMAT.substring(1), baos);
@@ -225,9 +222,8 @@ public class BmpManager /*extends FileManager*/ {
         return plus;
     }
 
-    public void tryCreateDirectory()
-            throws DirectoryCreationFailureException {
-        var logger = Log.get(BmpManager.class);
+    public void tryCreateDirectory() throws DirectoryCreationFailureException {
+        logger = Log.get(BmpManager.class);
 
         try {
             DirectoryManager.tryCreateDirectory(getPath());
@@ -248,10 +244,11 @@ public class BmpManager /*extends FileManager*/ {
     /**
      * Возращает максимально возможный обрезанный фрагмент по границам
      * изображения без проверки параметров.
-     * <p>
+     *
      * Если необходима проверка параметров x, y, width, height, то
-     * использойте метод {@link BmpManager#getFragement(String, int, int, int, int)}.
-     * <p>
+     * использойте метод
+     * {@link BmpManager#getFragement(String, int, int, int, int)}.
+     *
      * Если x, y, width, height выходят за пределы изображения, то
      * обрезанный фрагмент будет получен по границам изображения.
      * Соответственно, размеры фрагмента в таком случае получатся
@@ -259,11 +256,12 @@ public class BmpManager /*extends FileManager*/ {
      */
     public BufferedImage readCropped(File f, int x, int y,
                                      int width, int height)
-            throws IOException {
+            throws IOException, ParamOutOfBounds {
         var img = ImageIO.read(f);
         var imgWidth = img.getWidth();
         var imgHeight = img.getHeight();
-        var sourceRegion = MathManager.getFragmentIntersection(x, y, width, height, imgWidth, imgHeight);
+        var sourceRegion = MathManager.getFragmentIntersection(x, y, width,
+                height, imgWidth, imgHeight);
         var stream = ImageIO.createImageInputStream(f);
         var readers = ImageIO.getImageReaders(stream);
 
@@ -277,17 +275,18 @@ public class BmpManager /*extends FileManager*/ {
             var image = reader.read(0, param);
             return image;
         } else {
-            var mes = String.format("Не удалось обрезать изображение. Размеры изображения: %dx%d. Попытка вырезать " +
-                            "следующий прямоугольник: x = %d, y = %d, ширина = %d, высота = %d.\n" +
-                            "Проверьте, что все значения больше нуля", imgWidth, imgHeight,
+            var mes = String.format(MainConfig.CANNOT_CROP_IMAGE_MESSAGE,
+                    imgWidth, imgHeight,
                     sourceRegion.x, sourceRegion.y,
                     sourceRegion.width, sourceRegion.height);
-            throw new IOException(mes);
+            throw new ParamOutOfBounds("x, y, width, height",
+                    "Фрагмент должен " +
+                            "перескаться с изображением");
         }
     }
 
     public BufferedImage readCropped(File f, Rectangle frag)
-            throws IOException {
+            throws IOException, ParamOutOfBounds {
         return readCropped(f, frag.x, frag.y, frag.width, frag.height);
     }
 
