@@ -1,3 +1,8 @@
+/*
+ * (c) 2022, Дмитрий Лыков
+ *
+ * Больше информации в файле LICENSE
+ */
 package ru.gnkoshelev.kontur.intern.chartographer.universal;
 
 import java.time.LocalDate;
@@ -5,6 +10,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Random;
 import java.util.UUID;
 
+/**
+ * Генератор уникальных идентификаторов
+ */
 public class IdGenerator {
 
     /**

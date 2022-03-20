@@ -1,20 +1,25 @@
+/*
+ * (c) 2022, Дмитрий Лыков
+ *
+ * Больше информации в файле LICENSE
+ */
 package ru.gnkoshelev.kontur.intern.chartographer.universal;
 
-import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.FileSystemUtils;
-import org.springframework.util.ResourceUtils;
-import ru.gnkoshelev.kontur.intern.chartographer.config.MainConfig;
-
-import javax.servlet.ServletContext;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
+/**
+ * Класс для работы с ресурсами приложения.
+ * Ресурсы хранятся в папке src/main/resources/
+ */
 public class TextResourceManager {
 
+    /**
+     * Прочиать и вернуть текст в файле в папке с ресурсами
+     * @param fileName имя файла в папке с ресурсами
+     * @return текст из файла
+     * @throws IOException
+     */
     public static String getText(String fileName) throws IOException {
         var path = "classpath:" + fileName;
         var res = TextResourceManager.class.getClassLoader().getResourceAsStream(path);

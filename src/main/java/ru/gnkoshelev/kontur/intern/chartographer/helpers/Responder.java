@@ -1,3 +1,8 @@
+/*
+ * (c) 2022, Дмитрий Лыков
+ *
+ * Больше информации в файле LICENSE
+ */
 package ru.gnkoshelev.kontur.intern.chartographer.helpers;
 
 import org.slf4j.Logger;
@@ -7,26 +12,44 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import ru.gnkoshelev.kontur.intern.chartographer.config.MainConfig;
 
-import java.nio.charset.Charset;
-
+/**
+ * Класс для создания ответов на запросы (экзмепляров {@link ResponseEntity})
+ */
 public class Responder {
 
     public static final MediaType IMAGE_BMP = MediaType.parseMediaType("image/bmp");
     public static final MediaType APP_JSON = MediaType.APPLICATION_JSON;
     public static final MediaType TEXT_PLAIN = MediaType.TEXT_PLAIN;
 
+    /**
+     * Генерирует нужные заголовки для данного типа данных
+     * @param type тип данных
+     * @return объект с заголовками ответа
+     */
     public static HttpHeaders generateHeaders(MediaType type) {
         var result = new HttpHeaders();
         result.setContentType(type);
         return result;
     }
 
+    /**
+     * Вывести информацию об исключении в логгер
+     * @param e
+     * @param logger
+     */
     public static void showException(Exception e, Logger logger) {
         var message = e.getClass().getSimpleName() + " : " + e.getMessage();
         logger.error(message);
         e.printStackTrace();
     }
 
+    /**
+     * Формирует сообщение об ошибке, которое вернется пользователю
+     * @param e
+     * @param logger
+     * @param <T>
+     * @return
+     */
     public static <T> ResponseEntity<T> processException(Exception e, Logger logger) {
         var message = e.getClass().getSimpleName() + " : " + e.getMessage();
         showException(e, logger);

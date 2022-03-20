@@ -1,3 +1,8 @@
+/*
+ * (c) 2022, Дмитрий Лыков
+ *
+ * Больше информации в файле LICENSE
+ */
 package ru.gnkoshelev.kontur.intern.chartographer.helpers;
 
 import org.slf4j.Logger;

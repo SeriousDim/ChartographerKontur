@@ -38,9 +38,14 @@ import java.awt.Color;
 
 
 /**
- * Бин для работы с изображениями и директориями.
+ * Менеджер файлов для работы с изображениями.
  * Взаимодействует с файловой системой. Создает, сохраняет,
  * загружает, удаляет и меняет изображения.
+ *
+ * Для работы необходимо задать директорию в поле {@link BmpManager#path},
+ * с которой будет работать данный менеджер файлов.
+ *
+ * Также можно задать {@link BmpManager#FILE_FORMAT}
  */
 @Component(BmpManager.BEAN_NAME)
 @Scope("singleton")
@@ -49,7 +54,11 @@ public class BmpManager {
     public static final String BEAN_NAME = "bmpWorker";
     public static final String FILE_FORMAT = ".bmp";
 
-
+    /**
+     * Директория, с которой работает данный менеджер.
+     * Можно задать в классе-конфигурации {@link MainConfig}
+     * Получить значение можно с помощью {@link BmpManager#getPath()}
+     */
     @Value("#{mainConfig.bmpPath}")
     private String path;
 
@@ -58,6 +67,10 @@ public class BmpManager {
 
     // Методы для работы с бином
 
+    /**
+     * Возвращает бин класса {@link BmpManager}
+     * @return {@link BmpManager}
+     */
     public static BmpManager getAsBean() {
         return AppContextProvider.getBean(BEAN_NAME, BmpManager.class);
     }
@@ -67,9 +80,10 @@ public class BmpManager {
         tryCreateDirectory();
     }
 
-
-    // Реализация методов интерфейса FileManagerInterface
-
+    /**
+     * Сгенерировать уникальный id для нового файла.
+     * @return id в виде строки
+     */
     public String generateId() {
         var id = "";
         File file = null;
@@ -82,6 +96,12 @@ public class BmpManager {
         return id;
     }
 
+    /**
+     * Прочитать файл с данным именем из директории {@link BmpManager#path}
+     * @param fileName имя файла, который лежит в директории {@link BmpManager#path}
+     * @return прочитанный массив байтов
+     * @throws FileNotFoundException
+     */
     public byte[] readFileAsBytes(String fileName) throws FileNotFoundException {
         var path = getFilePath(fileName);
         var img = IJ.openAsByteBuffer(path);
@@ -93,6 +113,12 @@ public class BmpManager {
         return img.array();
     }
 
+    /**
+     * Возвращает путь к данному файлу. Директория задается
+     * полем {@link BmpManager#path}
+     * @param fileName имя файла
+     * @return путь к файлу в виде some/path/to/file.bmp
+     */
     public String getFilePath(String fileName) {
         return getPath() + "/" + fileName + FILE_FORMAT;
     }
@@ -126,11 +152,37 @@ public class BmpManager {
         return file;
     }
 
+    /**
+     * Создает новый файл с изображением и сохраняет его
+     * @param fileName название файла
+     * @param width ширина изображения
+     * @param height высота изображения
+     */
     public void createNewFile(String fileName, int width, int height) {
         var plus = createImage(fileName, width, height);
         IJ.save(plus, getFilePath(fileName));
     }
 
+    /**
+     * Заменяет заданный фрагмент изображения на новый.
+     * Обратите внимание, что width и height должны быть равны ширине и
+     * высоте передаваемого в аргументе {@code fragmentBytes} фрагмента
+     * соответсвенно.
+     * @param fileName название файла с изображением, у которого надо заменить
+     *                 определенный фрагмент
+     * @param fragmentBytes фрагмент в виде массива битов, который будет
+     *                      вставлен в изображение
+     * @param x координата x левой верхней точки области изображения, которая
+     *          будет заменена на фрагмент
+     * @param y координата y левой верхней точки области изображения, которая
+     *          будет заменена на фрагмент
+     * @param width ширина заменяемого фрагмента
+     * @param height высота заменяемого фрагмента
+     * @throws FileNotFoundException
+     * @throws IOException
+     * @throws ParamOutOfBounds при любой ошибке, связанной с параметрами
+     * метода
+     */
     public void saveFragment(String fileName,
                              byte[] fragmentBytes,
                              int x, int y,
@@ -173,6 +225,19 @@ public class BmpManager {
         }
     }
 
+    /**
+     * Возвращает фрагмент изображения
+     * @param fileName имя файла с изображением
+     * @param x координата x левой верхней точки фрагмента
+     * @param y координата y левой верхней точки фрагмента
+     * @param width ширина фрагмента
+     * @param height высота фрагмента
+     * @return
+     * @throws FileNotFoundException
+     * @throws ParamOutOfBounds при любой ошибке, связанной с параметрами
+     * метода
+     * @throws IOException
+     */
     public byte[] getFragement(String fileName,
                                int x, int y,
                                int width, int height)
@@ -196,6 +261,12 @@ public class BmpManager {
         return bufferedImgToBytes(resultImg);
     }
 
+    /**
+     * Удаляет файл с данным именем из директории {@link BmpManager#path}
+     * @param fileName имя файла
+     * @return true, в случае успешного удаления; false - иначе
+     * @throws FileNotFoundException
+     */
     public boolean deleteFile(String fileName)
             throws FileNotFoundException {
         var file = openFile(fileName);
@@ -217,6 +288,13 @@ public class BmpManager {
         return baos.toByteArray();
     }
 
+    /**
+     * Создать новый объект изображения {@link ImagePlus}
+     * @param fileName имя изображения
+     * @param width ширина изображения
+     * @param height высота изображения
+     * @return объект {@link ImagePlus}, представляющий изображение
+     */
     public ImagePlus createImage(String fileName, int width, int height) {
         var plus = IJ.createImage(fileName, "RGB", width, height, 1);
         var processor = plus.getProcessor();
@@ -224,6 +302,10 @@ public class BmpManager {
         return plus;
     }
 
+    /**
+     * @see DirectoryManager#tryCreateDirectory(String)
+     * @throws DirectoryCreationFailureException
+     */
     public void tryCreateDirectory() throws DirectoryCreationFailureException {
         logger = Log.get(BmpManager.class);
 
@@ -244,17 +326,25 @@ public class BmpManager {
     }
 
     /**
-     * Возращает максимально возможный обрезанный фрагмент по границам
-     * изображения без проверки параметров.
-     *
-     * Если необходима проверка параметров x, y, width, height, то
-     * использойте метод
-     * {@link BmpManager#getFragement(String, int, int, int, int)}.
+     * Возращает максимально возможный обрезанный фрагмент. Этот метод
+     * не читает все изображение, а читает только нужный его фрагмент.
      *
      * Если x, y, width, height выходят за пределы изображения, то
      * обрезанный фрагмент будет получен по границам изображения.
      * Соответственно, размеры фрагмента в таком случае получатся
      * меньше ожидаемых, либо фрагмент получится соверешенно не тем.
+     *
+     * Если вам нужно получить фрагмент имеено с данными шириной и высотой,
+     * то использойте метод
+     * @link BmpManager#getFragement(String, int, int, int, int)}.
+     * @param f файл с изображением, который надо обрезать
+     * @param x координата x левой верхней точки фрагмента
+     * @param y координата y левой верхней точки фрагмента
+     * @param width ожидаемая ширина обрезанного фрагмента
+     * @param height ожидаемая высота обрезанного фрагмента
+     * @return
+     * @throws IOException
+     * @throws ParamOutOfBounds
      */
     public BufferedImage readCropped(File f, int x, int y,
                                      int width, int height)
@@ -287,6 +377,14 @@ public class BmpManager {
         }
     }
 
+    /**
+     * @see BmpManager#readCropped(File, int, int, int, int)
+     * @param f
+     * @param frag
+     * @return
+     * @throws IOException
+     * @throws ParamOutOfBounds
+     */
     public BufferedImage readCropped(File f, Rectangle frag)
             throws IOException, ParamOutOfBounds {
         return readCropped(f, frag.x, frag.y, frag.width, frag.height);

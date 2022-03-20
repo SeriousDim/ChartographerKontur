@@ -1,5 +1,7 @@
 /*
- * Дмитрий Лыков, 2022
+ * (c) 2022, Дмитрий Лыков
+ *
+ * Больше информации в файле LICENSE
  */
 package ru.gnkoshelev.kontur.intern.chartographer.controller;
 
@@ -15,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.w3c.dom.Text;
 import ru.gnkoshelev.kontur.intern.chartographer.config.MainConfig;
 import ru.gnkoshelev.kontur.intern.chartographer.exception.FileNotFoundException;
 import ru.gnkoshelev.kontur.intern.chartographer.exception.ParamOutOfBounds;

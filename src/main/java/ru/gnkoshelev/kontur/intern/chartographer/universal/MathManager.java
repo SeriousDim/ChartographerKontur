@@ -1,3 +1,8 @@
+/*
+ * (c) 2022, Дмитрий Лыков
+ *
+ * Больше информации в файле LICENSE
+ */
 package ru.gnkoshelev.kontur.intern.chartographer.universal;
 
 import java.awt.Point;
@@ -8,16 +13,24 @@ import java.awt.Rectangle;
  */
 public class MathManager {
 
+    /**
+     * Проверяет принадлежность значения value интервалу, включая границы
+     * @param value значение для проверки
+     * @param start начало интервала
+     * @param end конец интервала
+     * @return
+     */
     public static boolean isBetween(int value, int start, int end) {
         return value >= start && value <= end;
     }
 
     /**
-     * @param input     - точка для преобразования, заданная
+     * Преобразует точку из одной системы координат в другую
+     * @param input     точка для преобразования, заданная
      *                  в старой системе координат
-     * @param oldOrigin - точка отсчета старой системы координат,
-     *                  *           заданная в старой системе координат
-     * @param newOrigin - точка отсчета новой системы координат,
+     * @param oldOrigin точка отсчета старой системы координат,
+     *                  заданная в старой системе координат
+     * @param newOrigin точка отсчета новой системы координат,
      *                  заданная в старой системе координат
      * @return точка input. заданная в новой системе координат
      */
@@ -27,6 +40,17 @@ public class MathManager {
         return new Point(nx, ny);
     }
 
+    /**
+     * Аналогично {@link MathManager#transformPoint(Point, Point, Point)},
+     * преобразует прямоугольник {@link Rectangle} из одной системы координат в
+     * другую
+     * @param input прямоугольник, точки которого заданы в старой системе координат
+     * @param oldOrigin точка отсчета старой системы координат,
+     *                  заданная в старой системе координат
+     * @param newOrigin точка отсчета новой системы координат,
+     *                  заданная в старой системе координат
+     * @return
+     */
     public static Rectangle transformRect(Rectangle input, Point oldOrigin, Point newOrigin) {
         var result = new Rectangle();
         var newLeftTop = transformPoint(new Point(input.x, input.y), oldOrigin, newOrigin);
@@ -39,6 +63,18 @@ public class MathManager {
         return result;
     }
 
+    /**
+     * Находит пересечение фрагмента изображения с самим изображением.
+     * Предполагается, что левая верхняя точка изображения находится в точке
+     * (0, 0)
+     * @param x координата x левой верхней точки фрагмента
+     * @param y координата y левой верхней точки фрагмента
+     * @param width ширина фрагмента
+     * @param height высота фрагмента
+     * @param imgWidth ширина изображения
+     * @param imgHeight ширина изображения
+     * @return
+     */
     public static Rectangle getFragmentIntersection(int x, int y, int width, int height,
                                              int imgWidth, int imgHeight) {
         var rFrag = new Rectangle(x, y, width, height);

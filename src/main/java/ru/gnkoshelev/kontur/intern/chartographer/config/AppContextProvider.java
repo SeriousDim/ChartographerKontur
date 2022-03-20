@@ -1,3 +1,8 @@
+/*
+ * (c) 2022, Дмитрий Лыков
+ *
+ * Больше информации в файле LICENSE
+ */
 package ru.gnkoshelev.kontur.intern.chartographer.config;
 
 import org.springframework.beans.BeansException;
@@ -5,6 +10,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
+/**
+ * Spring-контест для работы с бинами
+ */
 @Component
 public class AppContextProvider implements ApplicationContextAware {
 
