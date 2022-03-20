@@ -1,5 +1,7 @@
 /*
- * Дмитрий Лыков, 2022
+ * (c) 2022, Дмитрий Лыков
+ *
+ * Больше информации в файле LICENSE
  */
 package ru.gnkoshelev.kontur.intern.chartographer.component;
 
